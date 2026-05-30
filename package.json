@@ -1,7 +1,7 @@
 {
   "name": "@sero-ai/plugin-google",
   "version": "0.4.0",
-  "description": "Google Workspace app for Sero \u2014 Gmail & Calendar with gogcli",
+  "description": "Google Workspace app for Sero — Gmail & Calendar with gogcli",
   "keywords": [
     "pi-package"
   ],
@@ -99,8 +99,8 @@
   },
   "devDependencies": {
     "@module-federation/vite": "^1.11.0",
-    "@sero-ai/app-runtime": "^0.1.0",
-    "@sero-ai/common": "file:../../sero/packages/common",
+    "@sero-ai/app-runtime": "^0.1.3",
+    "@sero-ai/common": "^0.3.1",
     "@tailwindcss/vite": "^4.1.18",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^22.19.11",
