@@ -1,0 +1,9 @@
+/*
+ * Stylesheet for the dashboard widgets (Mail, Agenda). Kept separate from the
+ * full app's styles.css: widgets compose the shared @sero-ai/ui dashboard set,
+ * so they pull in its plugin stylesheet (tokens + glass surfaces) and scan the
+ * widget sources for the Tailwind utilities the components emit.
+ */
+@import "@sero-ai/ui/styles/plugin.css";
+
+@source "./**/*.{ts,tsx}";

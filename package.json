@@ -1,6 +1,6 @@
 {
   "name": "@sero-ai/plugin-google",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Google Workspace app for Sero — Gmail & Calendar with gogcli",
   "keywords": [
     "pi-package"
@@ -26,46 +26,46 @@
       "ui": "./dist/ui/remoteEntry.js",
       "component": "GoogleApp",
       "runtime": "./runtime/index.ts",
-      "devPort": 5186
+      "devPort": 5186,
+      "widgets": [
+        {
+          "id": "mail-indicator",
+          "name": "Mail",
+          "component": "MailWidget",
+          "description": "Unread count and recent inbox threads",
+          "defaultSize": {
+            "w": 2,
+            "h": 2
+          },
+          "minSize": {
+            "w": 2,
+            "h": 2
+          },
+          "maxSize": {
+            "w": 3,
+            "h": 3
+          }
+        },
+        {
+          "id": "agenda",
+          "name": "Agenda",
+          "component": "CalendarWidget",
+          "description": "Upcoming calendar events at a glance",
+          "defaultSize": {
+            "w": 2,
+            "h": 3
+          },
+          "minSize": {
+            "w": 2,
+            "h": 2
+          },
+          "maxSize": {
+            "w": 3,
+            "h": 4
+          }
+        }
+      ]
     },
-    "widgets": [
-      {
-        "id": "mail-indicator",
-        "name": "Mail",
-        "component": "MailWidget",
-        "description": "Unread count and recent inbox threads",
-        "defaultSize": {
-          "w": 2,
-          "h": 2
-        },
-        "minSize": {
-          "w": 2,
-          "h": 2
-        },
-        "maxSize": {
-          "w": 3,
-          "h": 3
-        }
-      },
-      {
-        "id": "mini-calendar",
-        "name": "Calendar",
-        "component": "CalendarWidget",
-        "description": "Month grid with event dots and upcoming events",
-        "defaultSize": {
-          "w": 2,
-          "h": 3
-        },
-        "minSize": {
-          "w": 2,
-          "h": 2
-        },
-        "maxSize": {
-          "w": 3,
-          "h": 4
-        }
-      }
-    ],
     "plugin": {
       "category": "integrations",
       "tags": [
@@ -92,15 +92,17 @@
     "typebox": "^1.1.37"
   },
   "peerDependencies": {
-    "@earendil-works/pi-ai": ">=0.78.0",
-    "@earendil-works/pi-coding-agent": ">=0.78.0",
-    "@earendil-works/pi-tui": ">=0.78.0",
+    "@earendil-works/pi-agent-core": ">=0.80.6",
+    "@earendil-works/pi-ai": ">=0.80.6",
+    "@earendil-works/pi-coding-agent": ">=0.80.6",
+    "@earendil-works/pi-tui": ">=0.80.6",
     "zod": ">=4.0.0"
   },
   "devDependencies": {
-    "@module-federation/vite": "^1.11.0",
+    "@module-federation/vite": "1.11.0",
     "@sero-ai/app-runtime": "^0.1.3",
     "@sero-ai/common": "^0.3.1",
+    "@sero-ai/ui": "^0.4.1",
     "@tailwindcss/vite": "^4.1.18",
     "@testing-library/react": "^16.3.2",
     "@types/node": "^22.19.11",
@@ -111,7 +113,9 @@
     "lucide-react": "^0.563.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "shadcn": "^3.8.5",
     "tailwindcss": "^4.1.18",
+    "tw-animate-css": "^1.4.0",
     "typescript": "^5.9.3",
     "vite": "^6.4.1",
     "vitest": "^4.1.4"
