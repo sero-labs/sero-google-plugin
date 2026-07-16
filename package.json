@@ -2,6 +2,7 @@
   "name": "@sero-ai/plugin-google",
   "version": "0.4.1",
   "description": "Google Workspace app for Sero — Gmail & Calendar with gogcli",
+  "type": "module",
   "keywords": [
     "pi-package"
   ],
