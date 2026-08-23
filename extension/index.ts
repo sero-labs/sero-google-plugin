@@ -18,7 +18,7 @@ import {
   applyGmailSearchResult,
   applyGmailThreadResult,
 } from '../shared/google-state';
-import { readState, resolveStatePath, writeState } from './app-state';
+import { resolveStatePath, updateState } from './app-state';
 import { runGog } from './gogcli';
 import { registerGoogleAuthTool } from './google/auth-tool';
 import { registerGoogleCliTool } from './google/cli-tool';
@@ -93,8 +93,6 @@ export default function (pi: ExtensionAPI) {
       if (!resolved) return errorToolResult('no workspace');
       statePath = resolved;
 
-      const state = await readState(statePath);
-
       switch (params.action) {
         case 'search': {
           const q = params.query || 'newer_than:3d';
@@ -109,25 +107,28 @@ export default function (pi: ExtensionAPI) {
 
           const data = parseJsonResponse(result.stdout);
           if (data) {
-            await writeState(statePath, applyGmailSearchResult(state, data, q));
+            // Re-read and merge under the shared state lock so the fetch never
+            // holds it and a concurrent UI write survives (sero#428).
+            await updateState(statePath, (current) => applyGmailSearchResult(current, data, q));
           }
           return textToolResult(result.stdout);
         }
 
         case 'read_thread': {
           if (!params.thread_id) return errorToolResult('thread_id required');
-          const result = await runGog(['gmail', 'thread', 'get', params.thread_id], { json: true });
+          const threadId = params.thread_id;
+          const result = await runGog(['gmail', 'thread', 'get', threadId], { json: true });
           if (result.exitCode !== 0) {
             return errorToolResult(result.stderr || 'Failed to read thread');
           }
 
           const data = parseJsonResponse(result.stdout);
           if (data) {
-            await writeState(statePath, applyGmailThreadResult(state, data, params.thread_id));
+            await updateState(statePath, (current) => applyGmailThreadResult(current, data, threadId));
           }
 
           const markReadResult = await runGog(
-            ['gmail', 'labels', 'modify', params.thread_id, '--remove', 'UNREAD'],
+            ['gmail', 'labels', 'modify', threadId, '--remove', 'UNREAD'],
             { json: true },
           );
           if (markReadResult.exitCode !== 0) {
@@ -209,12 +210,12 @@ export default function (pi: ExtensionAPI) {
       if (!resolved) return errorToolResult('no workspace');
       statePath = resolved;
 
-      const state = await readState(statePath);
       const calId = params.calendar_id || 'primary';
 
       switch (params.action) {
         case 'today':
         case 'week': {
+          const view = params.action;
           const flag = params.action === 'today' ? '--today' : '--week';
           const result = await runGog(['calendar', 'events', calId, flag], { json: true });
           if (result.exitCode !== 0) {
@@ -223,9 +224,9 @@ export default function (pi: ExtensionAPI) {
 
           const data = parseJsonResponse(result.stdout);
           if (data) {
-            await writeState(statePath, applyCalendarEventsResult(state, data, {
+            await updateState(statePath, (current) => applyCalendarEventsResult(current, data, {
               calendarId: calId,
-              view: params.action,
+              view,
             }));
           }
           return textToolResult(result.stdout);
@@ -235,9 +236,10 @@ export default function (pi: ExtensionAPI) {
           if (!params.from || !params.to) {
             return errorToolResult('from and to are required');
           }
+          const { from, to } = params;
           const max = params.max || 50;
           const result = await runGog(
-            ['calendar', 'events', calId, '--from', params.from, '--to', params.to, '--max', String(max)],
+            ['calendar', 'events', calId, '--from', from, '--to', to, '--max', String(max)],
             { json: true },
           );
           if (result.exitCode !== 0) {
@@ -246,11 +248,9 @@ export default function (pi: ExtensionAPI) {
 
           const data = parseJsonResponse(result.stdout);
           if (data) {
-            await writeState(statePath, applyCalendarEventsResult(state, data, {
+            await updateState(statePath, (current) => applyCalendarEventsResult(current, data, {
               calendarId: calId,
-              mergeRange: params.merge
-                ? { from: params.from, to: params.to }
-                : undefined,
+              mergeRange: params.merge ? { from, to } : undefined,
             }));
           }
           return textToolResult(result.stdout);
@@ -280,7 +280,7 @@ export default function (pi: ExtensionAPI) {
 
           const data = parseJsonResponse(result.stdout);
           if (data) {
-            await writeState(statePath, applyCalendarEventResult(state, data, calId));
+            await updateState(statePath, (current) => applyCalendarEventResult(current, data, calId));
           }
           return textToolResult(`Created: ${params.summary}`);
         }
@@ -302,7 +302,7 @@ export default function (pi: ExtensionAPI) {
 
           const data = parseJsonResponse(result.stdout);
           if (data) {
-            await writeState(statePath, applyCalendarCalendarsResult(state, data));
+            await updateState(statePath, (current) => applyCalendarCalendarsResult(current, data));
           }
           return textToolResult(result.stdout);
         }

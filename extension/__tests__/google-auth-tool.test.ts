@@ -4,8 +4,7 @@ const mocks = vi.hoisted(() => ({
   mkdir: vi.fn(),
   chmod: vi.fn(),
   writeFile: vi.fn(),
-  readState: vi.fn(),
-  writeState: vi.fn(),
+  updateState: vi.fn(),
   getGoogleAuthManager: vi.fn(),
   getGooglePluginConfigPath: vi.fn(),
 }));
@@ -19,9 +18,8 @@ vi.mock('node:fs', () => ({
 }));
 
 vi.mock('../app-state', () => ({
-  readState: mocks.readState,
   resolveStatePath: (cwd: string) => `${cwd}/.sero/apps/google/state.json`,
-  writeState: mocks.writeState,
+  updateState: mocks.updateState,
 }));
 
 vi.mock('../google/auth', () => ({
@@ -57,8 +55,7 @@ describe('Google auth tool', () => {
     mocks.mkdir.mockResolvedValue(undefined);
     mocks.chmod.mockResolvedValue(undefined);
     mocks.writeFile.mockResolvedValue(undefined);
-    mocks.readState.mockResolvedValue({ activeAccount: null });
-    mocks.writeState.mockResolvedValue(undefined);
+    mocks.updateState.mockImplementation(async (_path: string, updater: (s: { activeAccount: string | null }) => unknown) => updater({ activeAccount: null }));
     mocks.getGooglePluginConfigPath.mockReturnValue('/tmp/agent/plugin-config/sero-google-plugin.json');
     mocks.getGoogleAuthManager.mockReturnValue({
       getStatus: vi.fn(async () => ({ configured: true, authenticated: false })),

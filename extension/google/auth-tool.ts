@@ -8,7 +8,7 @@ import type { ExtensionAPI } from '@earendil-works/pi-coding-agent';
 import { Text } from '@earendil-works/pi-tui';
 import { Type } from 'typebox';
 
-import { readState, resolveStatePath, writeState } from '../app-state';
+import { resolveStatePath, updateState } from '../app-state';
 import { errorToolResult, textToolResult } from '../tool-results';
 import { getGoogleAuthManager } from './auth';
 import { getGooglePluginConfigPath } from './config';
@@ -73,9 +73,10 @@ function authStatusText(status: GoogleAuthStatus): string {
 }
 
 async function syncActiveAccount(statePath: string, email: string | null): Promise<void> {
-  const state = await readState(statePath);
-  if (state.activeAccount === email) return;
-  await writeState(statePath, { ...state, activeAccount: email });
+  // Runs under the shared state lock; an unchanged account skips the write (sero#428).
+  await updateState(statePath, (state) =>
+    state.activeAccount === email ? state : { ...state, activeAccount: email },
+  );
 }
 
 export function registerGoogleAuthTool(
