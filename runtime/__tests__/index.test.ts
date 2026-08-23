@@ -36,10 +36,14 @@ function createContext(initialState: GoogleAppState | null = null): {
           },
           watch: () => {},
           unwatch: () => {},
+          globalDir: async (namespace: string) => ({ path: `/tmp/app-global/${namespace}` }),
         },
         subagents: {
           runStructured: async () => ({ response: '' }),
           onLiveOutput: () => () => {},
+          listToolCatalog: async () => [],
+          listSkillCatalog: async () => [],
+          listAgentCatalog: async () => [],
         },
         workspace: {
           runCommand: async () => ({ stdout: '', stderr: '', exitCode: 0 }),
@@ -52,6 +56,13 @@ function createContext(initialState: GoogleAppState | null = null): {
             containerEnabled: false,
             capabilityAudit: [],
           }),
+          listAccessRoots: async (workspaceId: string) => ({
+            workspaceId,
+            runtime: { backend: 'host' as const, mode: 'host' as const },
+            roots: [],
+            warnings: [],
+          }),
+          list: async () => [],
         },
         verification: {
           detectCompileCommands: async () => [],
@@ -76,6 +87,10 @@ function createContext(initialState: GoogleAppState | null = null): {
           mergePr: async () => ({ success: false, error: 'not-used' }),
           getPrMergeState: async () => 'unknown',
           getPrMergeError: async () => null,
+          getWorkspaceStatus: async () => ({ isGitRepository: true, hasUncommittedChanges: false, summary: '' }),
+          stashWorkspaceChanges: async () => ({ stashRef: null }),
+          listPullRequests: async () => [],
+          listIssues: async () => [],
         },
         devServers: {
           startManaged: async () => ({ reason: 'not-used' }),
@@ -86,6 +101,24 @@ function createContext(initialState: GoogleAppState | null = null): {
         },
         notifications: {
           notify,
+          requestChoice: async () => ({ choiceId: null, timedOut: true }),
+        },
+        credentials: {
+          getProviderApiKey: async () => null,
+        },
+        toolchains: {
+          ensure: async () => ({ path: '/tmp/tool' }),
+          sharedToolsDir: async () => ({ path: '/tmp/app-tools' }),
+        },
+        models: {
+          list: async () => [],
+        },
+        session: {
+          getActiveForWorkspace: async () => null,
+          getState: async () => ({ idle: true, pendingMessages: 0, activeTurnId: null }),
+          sendUserSteer: async () => ({ turnId: null }),
+          sendContextMessage: async () => ({ turnId: null }),
+          onTurnComplete: () => () => {},
         },
       },
     },
